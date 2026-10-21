@@ -243,12 +243,14 @@ __marimo__/
 /data/demo/*
 !/data/demo/.gitkeep
 
-# Trained models and generated artifacts
+# Generated models
 /models/*
 !/models/.gitkeep
 
-# Final ONNX model required for inference
+# Required inference artifacts
 !/models/fraud_detector.onnx
+!/models/fraud_preprocessor.joblib
+!/models/selected_model_metadata.json
 
 
 # Local editor configuration

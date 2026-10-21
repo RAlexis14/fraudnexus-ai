@@ -1,0 +1,18 @@
+{
+  "model_name": "random_forest",
+  "architecture": "python_preprocessing_plus_onnx_estimator",
+  "sample_source": "development_only",
+  "sample_size": 1000,
+  "original_features": 9,
+  "transformed_features": 15,
+  "max_probability_difference": 2.384185793236071e-08,
+  "decision_agreement": 1.0,
+  "threshold": 0.9666666666666667,
+  "onnx_inputs": [
+    "features"
+  ],
+  "onnx_outputs": [
+    "label",
+    "probabilities"
+  ]
+}
