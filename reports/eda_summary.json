@@ -1,0 +1,18 @@
+{
+  "total_records": 100000,
+  "legitimate": 99700,
+  "fraudulent": 300,
+  "fraud_prevalence": 0.003,
+  "missing_values": {
+    "monto_transaccion": 0,
+    "canal_transaccion": 0,
+    "categoria_comercio": 0,
+    "velocidad_tx_10m": 0,
+    "velocidad_desplazamiento_kmh": 980,
+    "ratio_desviacion_monto": 1504,
+    "pais_emisor_coincide": 0,
+    "distancia_residencia_km": 1004,
+    "hora_dia": 0,
+    "es_fraude": 0
+  }
+}
