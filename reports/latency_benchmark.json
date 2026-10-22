@@ -1,0 +1,21 @@
+{
+  "timestamp_utc": "2026-10-22T14:21:36.140282+00:00",
+  "endpoint": "http://127.0.0.1:8000/predict",
+  "method": "sequential_http_requests",
+  "warmup_requests": 20,
+  "measured_requests": 200,
+  "successful_requests": 200,
+  "failed_requests": 0,
+  "http_latency_ms": {
+    "mean": 55.0836,
+    "p50": 53.9031,
+    "p95": 63.3668,
+    "p99": 69.2883,
+    "max": 86.7239,
+    "min": 50.2893
+  },
+  "mean_internal_processing_ms": 6.7798,
+  "all_successful_under_100ms": true,
+  "p95_under_100ms": true,
+  "errors": []
+}
