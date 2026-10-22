@@ -1,0 +1,30 @@
+
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
+COPY requirements/api.txt ./requirements/api.txt
+
+RUN python -m pip install --no-cache-dir \
+    "numpy==1.26.4" \
+    "pandas==2.2.3" \
+    "scipy==1.13.1" \
+    "scikit-learn==1.5.2" \
+    "joblib==1.4.2" \
+    "onnxruntime==1.20.1" \
+    -r requirements/api.txt \
+    && python -m pip install --no-cache-dir .
+
+COPY api/ ./api/
+COPY models/fraud_detector.onnx ./models/fraud_detector.onnx
+COPY models/fraud_preprocessor.joblib ./models/fraud_preprocessor.joblib
+COPY models/selected_model_metadata.json ./models/selected_model_metadata.json
+
+EXPOSE 8000
+
+CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

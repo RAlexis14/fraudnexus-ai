@@ -1,0 +1,20 @@
+
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements/dashboard.txt ./requirements/dashboard.txt
+
+RUN python -m pip install --no-cache-dir -r requirements/dashboard.txt
+
+COPY dashboard/ ./dashboard/
+COPY reports/eda_summary.json ./reports/eda_summary.json
+COPY reports/model_comparison.json ./reports/model_comparison.json
+COPY reports/onnx_validation.json ./reports/onnx_validation.json
+
+EXPOSE 8501
+
+CMD ["python", "-m", "streamlit", "run", "dashboard/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]

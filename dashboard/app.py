@@ -1,5 +1,6 @@
 """FraudNexus AI Streamlit dashboard."""
 
+
 from __future__ import annotations
 
 import json
@@ -10,8 +11,12 @@ import pandas as pd
 import plotly.express as px
 import requests
 import streamlit as st
+import os
 
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = os.getenv(
+    "API_BASE_URL",
+    "http://127.0.0.1:8000",
+).rstrip("/")
 
 EDA_SUMMARY_PATH = Path("reports/eda_summary.json")
 MODEL_COMPARISON_PATH = Path("reports/model_comparison.json")
