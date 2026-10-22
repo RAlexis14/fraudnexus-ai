@@ -1,0 +1,18 @@
+{
+  "validation_scope": "ONNX vs Python equivalence on ALL DEVELOPMENT rows (in-sample for candidate model)",
+  "holdout_evaluated": false,
+  "evaluated_rows": 40000,
+  "input_dtype": "float32",
+  "onnx_score_column": 1,
+  "calibrated_probability_threshold": 0.9999999146869891,
+  "margin_threshold": 16.276938777958534,
+  "maximum_absolute_margin_difference": 7.449597170250399e-07,
+  "decision_disagreements": 0,
+  "decision_agreement": 1.0,
+  "python_review_count": 160,
+  "onnx_review_count": 160,
+  "python_margins_within_0_001_of_threshold": 0,
+  "disagreement_examples": [],
+  "equivalent_on_checked_development_rows": true,
+  "notes": "Equivalence does not imply final predictive performance, generalization, or real-world bank safety."
+}

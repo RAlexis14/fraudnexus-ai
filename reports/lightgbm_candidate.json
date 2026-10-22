@@ -1,0 +1,27 @@
+{
+  "candidate": "lightgbm__weights",
+  "holdout_evaluated": false,
+  "oof_threshold": 0.9999999146869891,
+  "threshold_selection_positive_count": 148,
+  "oof_calibration_metrics_not_independent_validation": {
+    "tn": 39840,
+    "fp": 0,
+    "fn": 12,
+    "tp": 148,
+    "precision": 1.0,
+    "recall": 0.925,
+    "f1": 0.961038961038961,
+    "auc_pr": 0.9999999999999998,
+    "fpr": 0.0
+  },
+  "positive_score_quantiles": {
+    "0": 0.9999998926579312,
+    "0.01": 0.9999998933387922,
+    "0.05": 0.9999999082476652,
+    "0.1": 0.9999999322638116,
+    "0.5": 0.9999999396210423,
+    "1": 0.9999999396210745
+  },
+  "threshold_is_close_to_one": true,
+  "model_artifacts": "models\\candidates\\lightgbm_weights"
+}

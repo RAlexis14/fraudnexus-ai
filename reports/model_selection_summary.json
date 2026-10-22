@@ -1,0 +1,13 @@
+{
+  "scope": "development_only_not_external_holdout",
+  "initial_selection": "random_forest",
+  "provisional_selection": "lightgbm__weights",
+  "protocol": "five_outer_folds_with_inner_threshold_calibration",
+  "rows": 9,
+  "caveats": [
+    "Initial and expanded comparisons use different threshold-selection protocols: don't rank across them directly.",
+    "SMOTE/ADASYN in this experiment were applied after one-hot encoding.",
+    "Perfect AUC-PR/FPR values require investigation and must not be described as real-world performance.",
+    "Final model and threshold remain unfrozen; external holdout has not been evaluated."
+  ]
+}

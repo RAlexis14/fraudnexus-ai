@@ -1,0 +1,38 @@
+{
+  "scope": "ONE-TIME independent final holdout; no refit or threshold updates",
+  "evaluated_at_utc": "2026-10-22T21:21:29.806898+00:00",
+  "dataset_rows": 50000,
+  "holdout_rows": 10000,
+  "holdout_frauds": 40,
+  "holdout_legitimate": 9960,
+  "candidate": "lightgbm__weights",
+  "frozen_probability_threshold": 0.9999999146869891,
+  "frozen_margin_threshold": 16.276938777958534,
+  "metrics": {
+    "tn": 9960,
+    "fp": 0,
+    "fn": 0,
+    "tp": 40,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "auc_pr_average_precision": 1.0,
+    "roc_auc": 1.0,
+    "fpr": 0.0
+  },
+  "strict_recall_above_90_percent": true,
+  "onnx_python_decision_disagreements": 0,
+  "max_absolute_margin_difference": 7.449597170250399e-07,
+  "sha256_artifacts": {
+    "dataset": "d537b320321b137848300220b3f4e04b0e8c95e93a0f548e807f700f7da7bd2b",
+    "onnx": "5f5ec2c666b3b77f4fc2d5ff1b749e276cf38cdf67aa7e4801a05761e0573f93",
+    "preprocessor": "a65dbec39587df4e3b048da1a1b2c168e33aa2279eb5addc6dcea2c52ff72a80",
+    "python_model": "e68cbb521f210d3ba915763155c5f06a2a23f9dcaceb250786b3bab3f7b50205",
+    "metadata": "a5d0592f5354b881516c10027984aee0415a685499594d8b45077cadc54c49f3"
+  },
+  "notes": [
+    "AUC-PR is average precision computed on raw margins (rank-preserving scores).",
+    "Results apply to the reserved academic dataset, not a real banking production stream.",
+    "Do not use this result to retune thresholds or select another model."
+  ]
+}

@@ -1,6 +1,8 @@
 """FraudNexus AI: validated, inference-only banking fraud API."""
 
 import json
+import os
+import math
 from functools import lru_cache
 from pathlib import Path
 from time import perf_counter_ns
@@ -49,6 +51,8 @@ class BatchRequest(BaseModel):
 class Prediction(BaseModel):
     score: float
     threshold: float
+    margin: float | None = None
+    margin_threshold: float | None = None
     is_fraud: bool
     decision: Literal["REVIEW", "ALLOW"]
     preprocessing_ms: float
@@ -67,60 +71,104 @@ class FraudEngine:
     """Load trusted, versioned artifacts once; never retrain during requests."""
 
     def __init__(self, models_dir: Path = MODEL_DIR):
-        metadata = json.loads(
-            (models_dir / "selected_model_metadata.json").read_text(encoding="utf-8")
-        )
+        variant = os.environ.get("FRAUDNEXUS_MODEL", "random_forest").strip()
+        self.variant = variant
+        if variant == "lightgbm_candidate":
+            candidate_dir = models_dir / "candidates" / "lightgbm_weights"
+            metadata_path = candidate_dir / "metadata.json"
+            preprocessor_path = candidate_dir / "preprocessor.joblib"
+            onnx_path = candidate_dir / "model_margin_final.onnx"
+            self.mode = "raw_margin"
+        elif variant == "random_forest":
+            metadata_path = models_dir / "selected_model_metadata.json"
+            preprocessor_path = models_dir / "fraud_preprocessor.joblib"
+            onnx_path = models_dir / "fraud_detector.onnx"
+            self.mode = "probability"
+        else:
+            raise ValueError(f"Unknown FRAUDNEXUS_MODEL value: {variant}")
+
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         self.columns = list(metadata["feature_columns"])
         self.threshold = float(metadata["threshold"])
         if len(self.columns) != 9 or set(self.columns) != set(Transaction.model_fields):
             raise ValueError("Model metadata and API input schema disagree")
-        if not 0 <= self.threshold <= 1:
+        if not 0 < self.threshold < 1:
             raise ValueError("Invalid trained decision threshold")
+        self.margin_threshold = (
+            math.log(self.threshold) - math.log1p(-self.threshold)
+            if self.mode == "raw_margin" else None
+        )
 
-        # joblib must only load trusted files produced by this project.
-        self.preprocessor = joblib.load(models_dir / "fraud_preprocessor.joblib")
+        # Load only files produced by this trusted project.
+        self.preprocessor = joblib.load(preprocessor_path)
         self.session = ort.InferenceSession(
-            str(models_dir / "fraud_detector.onnx"),
-            providers=["CPUExecutionProvider"],
+            str(onnx_path), providers=["CPUExecutionProvider"]
         )
         inputs = self.session.get_inputs()
         if len(inputs) != 1 or inputs[0].name != "features":
             raise ValueError("Unexpected ONNX input contract")
-        if "probabilities" not in [output.name for output in self.session.get_outputs()]:
-            raise ValueError("ONNX probabilities output missing")
+        self.input_name = inputs[0].name
+        self.output_names = {output.name for output in self.session.get_outputs()}
+        if "probabilities" not in self.output_names:
+            raise ValueError("ONNX score output missing")
+
+    @staticmethod
+    def _to_two_columns(raw, batch_size: int) -> np.ndarray:
+        """Accept an ONNX tensor or an ONNX ZipMap sequence of dictionaries."""
+        if isinstance(raw, np.ndarray):
+            matrix = np.asarray(raw, dtype=np.float64)
+        elif isinstance(raw, list) and len(raw) == batch_size and all(isinstance(d, dict) for d in raw):
+            if any(0 not in d or 1 not in d for d in raw):
+                raise RuntimeError("Unexpected ONNX class labels in ZipMap")
+            matrix = np.asarray([[d[0], d[1]] for d in raw], dtype=np.float64)
+        else:
+            raise RuntimeError("Unknown ONNX score output format")
+        if matrix.shape != (batch_size, 2) or not np.isfinite(matrix).all():
+            raise RuntimeError("Invalid ONNX score matrix")
+        return matrix
 
     def predict_many(self, transactions: list[Transaction]) -> list[Prediction]:
         started = perf_counter_ns()
         frame = pd.DataFrame(
             [item.model_dump() for item in transactions], columns=self.columns
         )
-        # None is valid only for the three optional numeric fields.
         frame = frame.replace({None: np.nan})
         matrix = np.asarray(self.preprocessor.transform(frame), dtype=np.float32)
         preprocess_end = perf_counter_ns()
-        scores_matrix = self.session.run(["probabilities"], {"features": matrix})[0]
+        raw = self.session.run(["probabilities"], {self.input_name: matrix})[0]
         inference_end = perf_counter_ns()
+        score_matrix = self._to_two_columns(raw, len(transactions))
 
-        if scores_matrix.shape != (len(transactions), 2):
-            raise RuntimeError("Unexpected ONNX probability output shape")
-        scores = scores_matrix[:, 1]
-        if not np.isfinite(scores).all():
-            raise RuntimeError("Model returned non-finite scores")
+        if self.mode == "raw_margin":
+            margins = score_matrix[:, 1]
+            # Stable logistic conversion for DISPLAY ONLY. Do not decide on
+            # float32 probabilities, because near-one rounding changed results.
+            scores = np.where(
+                margins >= 0,
+                1.0 / (1.0 + np.exp(-np.clip(margins, 0, 700))),
+                np.exp(np.clip(margins, -700, 0)) / (1.0 + np.exp(np.clip(margins, -700, 0))),
+            )
+            flags = margins >= self.margin_threshold
+        else:
+            margins = [None] * len(transactions)
+            scores = score_matrix[:, 1]
+            flags = scores >= self.threshold
+
         pre_ms = (preprocess_end - started) / 1e6
         inference_ms = (inference_end - preprocess_end) / 1e6
         total_ms = (inference_end - started) / 1e6
-        # In batch processing, timings refer to the complete batch, not one row.
         return [
             Prediction(
-                score=float(score),
-                threshold=self.threshold,
-                is_fraud=bool(score >= self.threshold),
-                decision="REVIEW" if score >= self.threshold else "ALLOW",
+                score=float(score), threshold=self.threshold,
+                margin=float(margin) if margin is not None else None,
+                margin_threshold=self.margin_threshold,
+                is_fraud=bool(flag),
+                decision="REVIEW" if flag else "ALLOW",
                 preprocessing_ms=round(pre_ms, 4),
                 onnx_inference_ms=round(inference_ms, 4),
                 total_processing_ms=round(total_ms, 4),
             )
-            for score in scores
+            for score, margin, flag in zip(scores, margins, flags)
         ]
 
 
@@ -138,7 +186,7 @@ app = FastAPI(
 
 @app.get("/health")
 def health(engine: Annotated[FraudEngine, Depends(get_engine)]):
-    return {"status": "ok", "model": "onnx", "threshold": engine.threshold}
+    return {"status": "ok", "model": engine.variant, "threshold": engine.threshold, "margin_threshold": engine.margin_threshold}
 
 
 @app.post("/predict", response_model=Prediction)

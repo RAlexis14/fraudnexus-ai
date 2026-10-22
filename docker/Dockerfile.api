@@ -25,6 +25,11 @@ COPY models/fraud_detector.onnx ./models/fraud_detector.onnx
 COPY models/fraud_preprocessor.joblib ./models/fraud_preprocessor.joblib
 COPY models/selected_model_metadata.json ./models/selected_model_metadata.json
 
+# Selected LightGBM model and validated ONNX artifacts
+COPY models/candidates/lightgbm_weights/model_margin_final.onnx ./models/candidates/lightgbm_weights/model_margin_final.onnx
+COPY models/candidates/lightgbm_weights/preprocessor.joblib ./models/candidates/lightgbm_weights/preprocessor.joblib
+COPY models/candidates/lightgbm_weights/metadata.json ./models/candidates/lightgbm_weights/metadata.json
+
 EXPOSE 8000
 
 CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

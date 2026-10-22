@@ -17,7 +17,10 @@ EXAMPLE = {
 
 
 class FakeEngine:
+    variant = "random_forest"
     threshold = 0.75
+    margin_threshold = None
+
 
     def predict_many(self, transactions):
         return [
