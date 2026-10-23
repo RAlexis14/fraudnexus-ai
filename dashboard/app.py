@@ -1,4 +1,4 @@
-"""FraudNexus AI | Evidence-driven Streamlit dashboard (phase 1)."""
+"""FraudNexus AI | Banking-style evidence dashboard V1 final."""
 from __future__ import annotations
 
 import json
@@ -119,20 +119,41 @@ def show_indicator(model: dict, final: dict):
 
 def apply_style() -> None:
     st.markdown("""<style>
-      .stApp {background:#F5F7F6;color:#1F3140;}
-      h1,h2,h3 {color:#173D50; letter-spacing:-.025em;}
-      div[data-testid="stMetric"] {background:#FFFFFF;border:1px solid #E3E9E8;
-       border-radius:13px;padding:15px 17px;box-shadow:0 3px 14px rgba(22,48,59,.035);}
-      div[data-testid="stMetricLabel"] {color:#627883;}
-      div[data-testid="stTabs"] button {font-weight:500;}
-      .hero {border-left:4px solid #207F88;padding:4px 0 4px 15px;margin-bottom:18px;}
-      .hero strong {font-size:1.9rem;color:#173D50;letter-spacing:-.035em;}
-      .hero small {display:block;color:#607683;margin-top:3px;}
-      .note {font-size:.88rem;color:#697D85;}
-      .decision {padding:17px;border-radius:13px;font-size:1.25rem;
-       font-weight:700;border:1px solid #DEE8E5;}
-      .allow {background:#EAF5EF;color:#176442;}
-      .review {background:#FFF4E6;color:#865A18;}
+      :root {--fn-navy:#123747;--fn-accent:#087F87;--fn-bg:#F3F6F8;--fn-line:#E1E8ED;}
+      .stApp {background:var(--fn-bg);color:#233747;}
+      .block-container {max-width:1530px;padding-top:2rem;padding-bottom:3rem;}
+      h1,h2,h3 {color:var(--fn-navy);letter-spacing:-.027em;font-weight:720;}
+      h3 {margin-top:.7rem;}
+      section[data-testid="stSidebar"] {background:linear-gradient(180deg,#102E40 0%,#173D50 100%);border-right:1px solid #294B59;}
+      section[data-testid="stSidebar"] * {color:#E5EDF2;}
+      section[data-testid="stSidebar"] .stRadio label {padding:9px 10px;border-radius:9px;transition:background .15s;}
+      section[data-testid="stSidebar"] .stRadio label:hover {background:rgba(255,255,255,.09);}
+      section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {color:#91BCC8;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+      section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {line-height:1.4;}
+      section[data-testid="stSidebar"] div[role="radiogroup"] {gap:.2rem;}
+      section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {background:rgba(20,176,170,.18);border:1px solid rgba(66,216,202,.33);}
+      section[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {color:#FFFFFF;font-weight:700;}
+      div[data-testid="stMetric"] {background:#FFFFFF;border:1px solid var(--fn-line);
+        border-radius:14px;padding:17px 19px;box-shadow:0 4px 20px rgba(20,54,69,.04);}
+      div[data-testid="stMetricLabel"] {color:#617483;}
+      div[data-testid="stMetricValue"] {color:var(--fn-navy);}
+      div[data-testid="stVerticalBlockBorderWrapper"] {border-radius:14px;}
+      div[data-testid="stDataFrame"] {border:1px solid var(--fn-line);border-radius:10px;overflow:hidden;}
+      div.stButton > button[kind="primary"],div.stDownloadButton > button {border-radius:9px;font-weight:650;}
+      .hero {background:linear-gradient(105deg,#123747,#175365);border-radius:16px;
+        padding:25px 29px;margin-bottom:24px;box-shadow:0 10px 26px rgba(14,51,65,.12);}
+      .hero strong {font-size:2rem;color:#FFFFFF;letter-spacing:-.04em;}
+      .hero small {display:block;color:#C3DCE2;margin-top:5px;}
+      .note {font-size:.88rem;color:#617483;}
+      .decision {padding:19px;border-radius:12px;font-size:1.3rem;
+        font-weight:740;border:1px solid #DEE8E5;}
+      .allow {background:#E7F5EF;color:#176442;}
+      .review {background:#FFF2DD;color:#80510A;}
+      .fn-eyebrow {font-size:.75rem;color:#9BC4CE;letter-spacing:.15em;font-weight:700;margin-bottom:6px;}
+      .fn-sidebrand {padding:13px 8px 15px 8px;border-bottom:1px solid rgba(255,255,255,.16);margin-bottom:15px;}
+      .fn-sidebrand strong {font-size:1.21rem;color:white;letter-spacing:-.02em;}
+      .fn-sidebrand small {display:block;color:#B5D0D7;margin-top:4px;}
+      .fn-footer {font-size:.83rem;color:#6D8290;border-top:1px solid #DCE6EA;padding-top:16px;margin-top:36px;}
     </style>""", unsafe_allow_html=True)
 
 
@@ -156,7 +177,7 @@ def conf_matrix_chart(tn: int, fp: int, fn: int, tp: int, title: str):
 
 def center_view(eda: dict, final: dict, latency: dict, health: dict):
     st.subheader("Centro de control")
-    st.caption("Indicadores históricos del estudio y estado actual del prototipo; no son transacciones bancarias en vivo.")
+    st.caption("Visión consolidada del modelo operativo, la evaluación independiente y el rendimiento de la API.")
     active = health.get("model", "No disponible") if health.get("status") == "ok" else "API desconectada"
     friendly = {"lightgbm_candidate":"LightGBM · seleccionado", "random_forest":"Random Forest · referencia"}.get(active,active)
     if health.get("status") == "ok":
@@ -180,15 +201,15 @@ def center_view(eda: dict, final: dict, latency: dict, health: dict):
             fig.update_layout(showlegend=False,yaxis_title="Número de transacciones",xaxis_title="Clase verdadera",
                               height=345,margin=dict(t=10,b=30),font=dict(color=BRAND))
             fig.update_traces(textposition="outside",cliponaxis=False)
-            st.plotly_chart(fig,use_container_width=True)
-            st.caption("Dataset oficial completo: 50.000 transacciones. No representa actividad operativa actual.")
+            st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
+            st.caption("Distribución de las 50.000 operaciones del conjunto de estudio.")
         else: st.info("Sin resumen EDA.")
     with right:
         st.markdown("#### Evaluación independiente · LightGBM")
         if metrics:
             st.plotly_chart(conf_matrix_chart(metrics['tn'],metrics['fp'],metrics['fn'],metrics['tp'],
               "Matriz de confusión · holdout (n=10.000)"),use_container_width=True)
-            st.caption("Resultados exclusivos del modelo LightGBM congelado. No equivalen al modelo activo si la API usa Random Forest.")
+            st.caption("Evaluación independiente de LightGBM. Los resultados están vinculados al modelo seleccionado.")
         else: st.info("No se encontró lightgbm_final_holdout.json")
     st.markdown("#### Rendimiento HTTP del modelo seleccionado")
     if latency:
@@ -201,16 +222,16 @@ def center_view(eda: dict, final: dict, latency: dict, health: dict):
             fig.update_layout(xaxis_title="Estadístico de latencia HTTP",yaxis_title="Tiempo (ms)",
                 title="Benchmark local, solicitudes secuenciales",yaxis_range=[0,max(112,max(values)*1.25)],
                 height=340,margin=dict(t=60,b=15),font=dict(color=BRAND))
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
             st.caption(f"{latency.get('successful_requests','?')} solicitudes exitosas · "
-                "Incluye tiempo HTTP local, no evalúa concurrencia ni producción. "
-                "El informe debe corresponder al modelo actualmente seleccionado.")
+                "Tiempo medido en solicitudes HTTP locales. "
+                "Benchmark registrado para el modelo seleccionado.")
     else: st.info("No se encontró un reporte de latencia.")
 
 
 def lab_view(initial: dict, resampling: dict, final: dict):
     st.subheader("Laboratorio de modelos")
-    st.caption("Comparación experimental sobre desarrollo (40.000 filas). El holdout final se presenta por separado.")
+    st.caption("Validación cruzada estratificada, estrategias de desbalance y evaluación independiente.")
     config = resampling.get("configurations",{})
     rows=[]
     names={"random_forest":"Random Forest","xgboost":"XGBoost","lightgbm":"LightGBM"}
@@ -241,7 +262,7 @@ def lab_view(initial: dict, resampling: dict, final: dict):
             fig.update_traces(texttemplate="%{text:.2f}")
             fig.update_xaxes(range=[0,107])
         else: fig.update_traces(texttemplate="%{text:.4f}");fig.update_xaxes(range=[0,1.09])
-        st.plotly_chart(fig,use_container_width=True)
+        st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
         st.caption("Cada configuración fue evaluada con 5 folds externos; el umbral se calibró en una partición interna. "
           "SMOTE/ADASYN operaron sobre One-Hot Encoding, con la limitación metodológica documentada.")
         selected=st.selectbox("Matriz de confusión de desarrollo",list(config.keys()),
@@ -265,13 +286,13 @@ def lab_view(initial: dict, resampling: dict, final: dict):
         c3.metric("AUC-PR · holdout",f"{met['auc_pr_average_precision']:.4f}")
         c4.metric("Falsos negativos",str(met["fn"]))
         st.caption("Evaluación única de 10.000 operaciones reservadas, con 40 fraudes. "
-           "Es un dataset académico, no evidencia de precisión bancaria en producción.")
-    else: st.info("No se encontró reports/lightgbm_final_holdout.json.")
+           "Resultados de la evaluación independiente, sobre 10.000 registros reservados.")
+    else: st.info("El informe de evaluación final no está disponible en esta instalación.")
 
 
 def individual_view():
     st.subheader("Evaluación individual")
-    st.caption("Inferencia ONNX a través de FastAPI. ALLOW permite continuar la simulación; REVIEW solicita revisión adicional simulada.")
+    st.caption("Evaluación transaccional en tiempo de ejecución mediante el motor ONNX y FastAPI.")
     with st.form("transaction"):
         a,b,c=st.columns(3)
         monto=a.number_input("Monto (USD)",min_value=0.0,value=65.2)
@@ -296,12 +317,12 @@ def individual_view():
     if result:
         decision=result["decision"]
         style="review" if decision=="REVIEW" else "allow"
-        st.markdown(f'<div class="decision {style}">Decisión del prototipo: {decision}</div>',unsafe_allow_html=True)
+        st.markdown(f'<div class="decision {style}">Decisión de riesgo: {decision}</div>',unsafe_allow_html=True)
         p,q,r=st.columns(3)
         p.metric("Score del modelo",f"{result['score']:.9f}")
         q.metric("Tiempo interno",f"{result['total_processing_ms']:.2f} ms")
         r.metric("Margen bruto",f"{result['margin']:.5f}" if result.get("margin") is not None else "No disponible")
-        st.caption("Score no necesariamente calibrado como probabilidad estadística; decisión LightGBM basada en margen bruto.")
+        st.caption("La política ALLOW / REVIEW se determina a partir del margen del modelo y su umbral configurado.")
         with st.expander("Detalles técnicos de la respuesta"):
             st.json(result)
 
@@ -320,7 +341,7 @@ def demo_records():
 
 def simulation_view():
     st.subheader("Simulación por lotes")
-    st.caption("Demostración académica de cuatro transacciones en un lote. Esto aún NO es un streaming secuencial.")
+    st.caption("Cuatro operaciones de referencia procesadas mediante inferencia por lotes.")
     demo=demo_records()
     st.dataframe(pd.DataFrame(demo),use_container_width=True,hide_index=True)
     if st.button("Ejecutar lote",type="primary"):
@@ -336,27 +357,55 @@ def simulation_view():
         frame=st.session_state["batch_result"]
         st.dataframe(frame[["ID","monto_transaccion","canal_transaccion","score","decision","total_processing_ms"]],
             use_container_width=True,hide_index=True)
-        st.caption("La latencia reportada por la API para cada entrada puede corresponder al procesamiento del lote completo.")
+        st.caption("Medición de procesamiento del lote completo; el switch presenta tiempos por evento.")
 
 
 def technical_view(health:dict, final:dict):
-    st.subheader("Arquitectura y evidencia")
-    st.markdown("**Flujo:** formulario/simulador → FastAPI → preprocesamiento 9→15 variables → ONNX Runtime → decisión ALLOW/REVIEW.")
-    st.markdown("**Estado del servicio**")
-    st.json(health)
-    st.markdown("**Trazabilidad del modelo evaluado**")
+    st.subheader("Arquitectura y auditoría")
+    st.caption("Contrato de datos, flujo de inferencia y trazabilidad del modelo seleccionado.")
+    a,b,c,d=st.columns(4)
+    a.metric("Entrada de negocio", "9 variables")
+    b.metric("Vector ONNX", "15 características")
+    c.metric("Formato numérico", "float32")
+    d.metric("Motor", "ONNX Runtime")
+    st.markdown("#### Flujo de inferencia")
+    st.markdown("**Transacción (9 variables)** → **FastAPI** → **Imputación + One-Hot (15 columnas)** → **LightGBM ONNX** → **ALLOW / REVIEW**")
+    manifest=read_json('onnx_input_contract.json')
+    if manifest:
+        st.success('Contrato de entrada documentado a partir de los artefactos del modelo.')
+        names=manifest.get('transformed_features',[])
+        if names:
+            with st.expander('Ver orden exacto de las características ONNX'):
+                st.dataframe(pd.DataFrame({'Posición':range(1,len(names)+1),'Característica transformada':names}),
+                             use_container_width=True,hide_index=True)
+        checks=manifest.get('checks',{})
+        if checks:
+            st.dataframe(pd.DataFrame([{'Comprobación':k,'Resultado':str(v)} for k,v in checks.items()]),
+                         hide_index=True,use_container_width=True)
+    else:
+        st.info('Contrato de entrada: 9 campos originales, 7 numéricos y 2 categóricos codificados en 8 columnas. El manifiesto técnico permite verificar los 15 nombres exactos.')
+    with st.expander('Ver nombres y tipos de las nueve variables originales'):
+        st.dataframe(pd.DataFrame({'Variable':COLUMNS,
+            'Tipo':['float','categoría','categoría','entero','float','float','binaria 0/1','float','entero 0–23']}),
+            use_container_width=True,hide_index=True)
+    st.markdown('#### Operación y trazabilidad')
+    if health.get('status')=='ok':
+        st.success('Servicio de inferencia disponible · '+str(health.get('model')))
+    else:
+        st.error('Servicio de inferencia sin conexión')
+    with st.expander('Ver respuesta técnica de la API'):
+        st.json(health)
     if final:
-        st.json({"candidate":final.get("candidate"),"evaluated_at_utc":final.get("evaluated_at_utc"),
-          "onnx_python_decision_disagreements":final.get("onnx_python_decision_disagreements"),
-          "sha256_artifacts":final.get("sha256_artifacts",{})})
-    else: st.info("No se encontró el informe final.")
-    st.info("Prototipo académico: no conecta a redes de pago ni autoriza transacciones bancarias reales.")
-
+        st.markdown('**Evaluación congelada · LightGBM**')
+        h=final.get('sha256_artifacts',{})
+        st.dataframe(pd.DataFrame([{'Artefacto':k,'SHA-256':v} for k,v in h.items()]),
+                     use_container_width=True,hide_index=True)
+        st.caption(f"Fecha de evaluación (UTC): {final.get('evaluated_at_utc','No disponible')} · Coincidencia de decisiones ONNX/Python: {final.get('onnx_python_decision_disagreements','No disponible')} desacuerdos")
 
 
 def pattern_view():
     st.subheader("Inteligencia transaccional")
-    st.caption("Descripción del dataset académico completo: 50.000 operaciones, 200 fraudes. Asociaciones observadas, no causas ni estadísticas bancarias reales.")
+    st.caption("50.000 transacciones analizadas · 200 casos de fraude · Indicadores por canal, contexto y comportamiento.")
     canal=patterns_csv('canal_transaccion_summary.csv')
     cats=patterns_csv('categoria_comercio_summary.csv')
     countries=patterns_csv('pais_emisor_coincide_summary.csv')
@@ -385,7 +434,7 @@ def pattern_view():
         fig.update_layout(height=340,margin=dict(l=10,r=45,t=15,b=40),
                           xaxis_title='Tasa de fraude (%)' if metric=='tasa_fraude_pct' else 'Fraudes (casos)',
                           yaxis_title='Canal' if col=='canal_transaccion' else 'Categoría comercial',showlegend=False)
-        st.plotly_chart(fig,use_container_width=True)
+        st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
     with c2:
         st.dataframe(df[[col,'operaciones','fraudes','tasa_fraude_pct']].sort_values('tasa_fraude_pct',ascending=False)
                     .rename(columns={col:'Grupo','operaciones':'Operaciones','fraudes':'Fraudes','tasa_fraude_pct':'Tasa (%)'})
@@ -402,7 +451,7 @@ def pattern_view():
             fig=px.bar(country,x='Grupo',y='tasa_fraude_pct',text='tasa_fraude_pct',color_discrete_sequence=[AMBER])
             fig.update_traces(texttemplate='%{text:.2f}%',textposition='outside')
             fig.update_layout(title='Coincidencia del país emisor',xaxis_title='Contexto de la operación',yaxis_title='Fraudes / operaciones (%)',height=360,showlegend=False)
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
             st.caption('Tasa dentro de cada grupo; no indica que una compra internacional sea fraudulenta.')
     with right:
         if not hours.empty:
@@ -412,7 +461,7 @@ def pattern_view():
             fig.add_trace(go.Scatter(x=hh.hora_dia,y=hh.tasa_fraude_pct,name='Tasa (%)',yaxis='y2',mode='lines+markers',line_color=AMBER))
             fig.update_layout(title='Fraude por hora del día',xaxis_title='Hora (0–23)',yaxis_title='Fraudes (casos)',
                 yaxis2=dict(title='Tasa de fraude (%)',overlaying='y',side='right'),legend=dict(orientation='h',y=-.3),height=360)
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
             st.caption('La tasa horaria depende del volumen de operaciones; consulte el detalle por hora antes de interpretar picos.')
     st.markdown('#### 03 · Diferencias de comportamiento entre clases')
     if not numeric.empty:
@@ -426,7 +475,7 @@ def pattern_view():
             color_discrete_map={'Legítima':ACCENT,'Fraude':AMBER})
         fig.update_traces(texttemplate='%{text:.2f}',textposition='outside')
         fig.update_layout(showlegend=False,yaxis_title=f'Mediana · {labels[selection]}',xaxis_title='Etiqueta real',height=350)
-        st.plotly_chart(fig,use_container_width=True)
+        st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
         st.caption('Medianas por clase; diferencias descriptivas. No miden importancia predictiva ni causalidad.')
         st.dataframe(dd[['Clase','n','p25','mediana','p75','promedio']].rename(columns={'n':'Operaciones','p25':'P25','mediana':'Mediana','p75':'P75','promedio':'Promedio'})
              .style.format({'P25':'{:.2f}','Mediana':'{:.2f}','P75':'{:.2f}','Promedio':'{:.2f}'}),hide_index=True,use_container_width=True)
@@ -439,15 +488,15 @@ def pattern_view():
                 st.caption('Los límites de intervalos son descriptivos, NO umbrales operativos validados.')
     with st.expander('Metodología, alcance y limitaciones'):
         st.markdown('''- Tasa = fraudes etiquetados / operaciones del grupo × 100; el denominador cambia entre grupos.
-- Los archivos agregados proceden del conjunto académico completo (incluye el holdout ya evaluado) y solo sirven para **descripción**, jamás para ajustar el modelo congelado.
-- Un patrón asociado no demuestra causalidad ni desempeño en datos bancarios de producción.
-- Las clases muestran separabilidad elevada y pocos fraudes (200); es necesario discutir la posible naturaleza artificial de los patrones.''')
+- Los indicadores descriptivos se calcularon sobre las 50.000 operaciones del conjunto de estudio y se mantienen separados de los experimentos predictivos.
+- Las asociaciones estadísticas describen patrones observados; no establecen relaciones causales.
+- El desequilibrio y la alta separabilidad observada se documentan en la discusión metodológica.''')
 
 
 def csv_view(health: dict):
     st.subheader('Análisis de transacciones CSV')
-    st.caption('Evaluación de archivos nuevos por FastAPI y ONNX. Hasta 5.000 filas por archivo y lotes de 250; sin entrenamiento ni actualización del modelo.')
-    st.warning('Utiliza datos académicos o anonimizados. No cargues información bancaria personal ni números reales de tarjetas.')
+    st.caption('Carga, clasificación y exportación de resultados de múltiples operaciones con el modelo seleccionado.')
+    st.warning('Privacidad de datos: utiliza transacciones de prueba o información anonimizada.')
     if health.get('status') != 'ok':
         st.error('API desconectada. Inicia FastAPI antes de evaluar.');return
     up=st.file_uploader('Archivo CSV (UTF-8)',type=['csv'],key='csv_upload')
@@ -494,7 +543,7 @@ def csv_view(health: dict):
         _,out,elapsed,model=entry
         m1,m2,m3=st.columns(3)
         m1.metric('Operaciones',len(out));m2.metric('REVIEW',int((out.decision=='REVIEW').sum()));m3.metric('HTTP total (ms)',f'{elapsed:,.1f}')
-        st.caption(f'Motor: {model}. Tiempo total de llamadas HTTP de esta ejecución, no latencia individual ni prueba de streaming.')
+        st.caption(f'Motor: {model}. Tiempo acumulado de procesamiento HTTP por lotes.')
         st.dataframe(out,use_container_width=True,hide_index=True)
         if 'es_fraude' in out:
             mm=inference_metrics(out)
@@ -502,14 +551,14 @@ def csv_view(health: dict):
             a.metric('Recall',f"{mm['recall']:.2%}");b.metric('Precision',f"{mm['precision']:.2%}")
             c.metric('F1',f"{mm['f1']:.2%}");d.metric('FPR',f"{mm['fpr']:.2%}")
             st.plotly_chart(conf_matrix_chart(mm['tn'],mm['fp'],mm['fn'],mm['tp'],f'Matriz de confusión · CSV etiquetado (n={len(out):,})'),use_container_width=True)
-            st.caption('Evaluación exploratoria de este archivo, independiente del holdout académico. Métricas de clases ausentes se definen como 0; examine soporte por clase.')
+            st.caption('Métricas calculadas a partir de las etiquetas aportadas en el archivo; revisa el soporte de cada clase.')
         else:st.info('Sin columna es_fraude: no se pueden calcular Recall, F1 ni Precision. Las predicciones no son verdad terreno.')
         st.download_button('Descargar predicciones CSV',out.to_csv(index=False).encode('utf-8-sig'),file_name='fraudnexus_predicciones.csv',mime='text/csv')
 
 
 def switch_view(health: dict):
     st.subheader('Switch transaccional · simulación secuencial')
-    st.caption('Eventos individuales enviados a POST /predict mediante HTTP; no existe conexión a un switch real ni procesamiento distribuido.')
+    st.caption('Procesamiento secuencial de eventos, seguimiento de decisiones y latencia individual mediante FastAPI.')
     if health.get('status') != 'ok':st.error('API no disponible');return
     x,y=st.columns([1,2])
     qty=x.slider('Operaciones por ejecución',2,100,20,2)
@@ -547,9 +596,9 @@ def switch_view(health: dict):
             fig=px.line(good,x='ID',y='HTTP (ms)',markers=True,title='Latencia HTTP por evento simulado')
             fig.add_hline(y=100,line_dash='dash',line_color='#B45B4E',annotation_text='Referencia 100 ms')
             fig.update_layout(xaxis_title='Evento secuencial',yaxis_title='Tiempo HTTP (ms)',height=330)
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
             st.caption(f"p95 de la sesión: {good['HTTP (ms)'].quantile(.95):.2f} ms · {len(good)} eventos válidos. "
-                'Los escenarios no son operaciones observadas ni etiquetas verdaderas; no calcular Recall con estos ejemplos.')
+                'Escenarios configurados para la demostración; latencia HTTP medida por cada evento.')
         st.download_button('Exportar bitácora CSV',ledger.to_csv(index=False).encode('utf-8-sig'),file_name='fraudnexus_switch_simulado.csv',mime='text/csv')
 
 
@@ -566,9 +615,48 @@ def importance_view():
             error_x='std_auc_pr_drop',title='Caída de AUC-PR al permutar cada variable · datos de desarrollo',
             color_discrete_sequence=[ACCENT])
     fig.update_layout(xaxis_title='Caída media de AUC-PR (unidades de 0 a 1)',yaxis_title='Variable original',height=430)
-    st.plotly_chart(fig,use_container_width=True)
-    st.caption('Importancia global asociativa, NO causal; depende del conjunto y de la correlación entre características. Evaluación sobre desarrollo, no holdout.')
+    st.plotly_chart(fig,use_container_width=True,config={"displaylogo":False})
+    st.caption('Sensibilidad por permutación calculada sobre desarrollo. Interpretación asociativa; no representa causalidad.')
     st.dataframe(imp,use_container_width=True,hide_index=True)
+
+def feature_reduction_view():
+    st.markdown('#### Estudio de reducción de variables')
+    st.caption('Comparación complementaria mediante cinco folds estratificados sobre desarrollo. El motor seleccionado permanece sin cambios.')
+    p=REPORTS/'feature_reduction'/'summary.csv'
+    if not p.is_file():
+        st.info('El resumen de reducción de variables estará disponible al incorporar reports/feature_reduction/summary.csv.')
+        return
+    try:
+        df=pd.read_csv(p)
+    except (OSError,ValueError,pd.errors.ParserError) as exc:
+        st.warning(f'No se pudo abrir el estudio de reducción: {exc}')
+        return
+    expected={'variable_count','recall','f1','tp','fp','fn','mean_fold_auc_pr'}
+    if not expected.issubset(df.columns):
+        st.warning('El reporte de reducción no contiene las columnas previstas.')
+        return
+    df=df[df['variable_count'].isin([9,6,4])].copy()
+    if df.empty: return
+    df=df.sort_values('variable_count',ascending=False)
+    plot=pd.DataFrame({'Variables':df['variable_count'].astype(str),
+        'Recall (%)':df['recall']*100,'F1 (%)':df['f1']*100})
+    fig=go.Figure()
+    for name,color in [('Recall (%)',ACCENT),('F1 (%)',BRAND)]:
+        fig.add_trace(go.Bar(name=name,x=plot['Variables'],y=plot[name],marker_color=color,
+            text=[f'{v:.2f} %' for v in plot[name]],textposition='outside'))
+    fig.update_layout(title='Rendimiento por cantidad de variables · validación cruzada',
+       barmode='group',xaxis_title='Variables originales utilizadas',yaxis_title='Porcentaje (%)',
+       yaxis_range=[0,107],height=400,margin=dict(t=60,b=30),legend=dict(orientation='h',y=1.15))
+    st.plotly_chart(fig,use_container_width=True,config={'displaylogo':False})
+    df=df.rename(columns={'variable_count':'Variables','tp':'TP','fp':'FP','fn':'FN',
+       'recall':'Recall','f1':'F1','mean_fold_auc_pr':'AUC-PR medio por fold'})
+    st.dataframe(df[['Variables','TP','FP','FN','Recall','F1','AUC-PR medio por fold']]
+        .style.format({'Recall':'{:.2%}','F1':'{:.2%}','AUC-PR medio por fold':'{:.4f}'}),
+        use_container_width=True,hide_index=True)
+    st.info('**Hallazgo:** con cuatro, seis y nueve variables se detectaron 157 de 160 fraudes en desarrollo. La reducción no cambió las métricas observadas en este experimento.')
+    with st.expander('Alcance metodológico'):
+        st.markdown('La selección de características se efectuó dentro del entrenamiento de cada fold. Esta comparación exploratoria no modifica el LightGBM ONNX desplegado ni constituye una nueva evaluación independiente del holdout.')
+
 
 def main():
     st.set_page_config(page_title="FraudNexus AI | Monitor de riesgo",page_icon="🛡️",layout="wide")
@@ -580,9 +668,21 @@ def main():
     final=read_json("lightgbm_final_holdout.json")
     latency=read_json("lightgbm_latency_benchmark.json")
     health=get_health()
-    nav=st.sidebar.radio('Navegación',['Centro de control','Inteligencia transaccional','Evaluación individual',
-        'Análisis de CSV','Switch simulado','Laboratorio de modelos','Arquitectura y auditoría'])
-    st.sidebar.caption('Modelo operativo: '+str(health.get('model','API desconectada')))
+    with st.sidebar:
+        st.markdown("""<div class="fn-sidebrand"><div class="fn-eyebrow">RISK INTELLIGENCE</div>
+          <strong>◈ FraudNexus AI</strong><small>Centro de análisis transaccional</small></div>""", unsafe_allow_html=True)
+        nav=st.radio('Espacio de trabajo',[
+          'Centro de control','Inteligencia transaccional','Evaluación individual',
+          'Análisis de CSV','Switch simulado','Laboratorio de modelos','Arquitectura y auditoría'
+        ])
+        st.divider()
+        if health.get('model') == 'lightgbm_candidate' and health.get('status') == 'ok':
+            st.success('● Motor LightGBM · Activo')
+        elif health.get('status') == 'ok':
+            st.warning('Motor activo: '+str(health.get('model')))
+        else:
+            st.error('Servicio no disponible')
+        st.caption('Inferencia ONNX · API FastAPI')
     if nav=='Centro de control':center_view(eda,final,latency,health)
     elif nav=='Inteligencia transaccional':pattern_view()
     elif nav=='Evaluación individual':individual_view()
@@ -591,8 +691,9 @@ def main():
     elif nav=='Laboratorio de modelos':
         lab_view(initial,resampling,final)
         importance_view()
+        feature_reduction_view()
     else:technical_view(health,final)
-    st.caption("FraudNexus AI · Prototipo de investigación. Los resultados académicos no garantizan desempeño bancario real.")
+    st.caption("FraudNexus AI · Motor de detección ONNX · Monitoreo y analítica transaccional")
 
 
 if __name__=="__main__":

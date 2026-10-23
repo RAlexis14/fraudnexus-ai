@@ -1,0 +1,9 @@
+tp,fp,tn,fn,recall,precision,f1,auc_pr,threshold_internal,fold,variable_count,selected_features,n_validation
+20,0,4980,0,1.0,1.0,1.0,1.0,0.999463374088516,1,9,"monto_transaccion,canal_transaccion,categoria_comercio,velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,pais_emisor_coincide,distancia_residencia_km,hora_dia",5000
+20,0,4980,0,1.0,1.0,1.0,1.0,0.9996001141646736,1,6,"monto_transaccion,velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,pais_emisor_coincide,distancia_residencia_km",5000
+20,0,4980,0,1.0,1.0,1.0,1.0,0.99972235312734,1,4,"velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,distancia_residencia_km",5000
+20,5,4975,0,1.0,0.8,0.8888888888888888,0.96,0.9933328722395541,1,1,ratio_desviacion_monto,5000
+20,0,4980,0,1.0,1.0,1.0,1.0,0.9999926633259719,2,9,"monto_transaccion,canal_transaccion,categoria_comercio,velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,pais_emisor_coincide,distancia_residencia_km,hora_dia",5000
+20,0,4980,0,1.0,1.0,1.0,1.0,0.9999926633259719,2,6,"monto_transaccion,velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,pais_emisor_coincide,distancia_residencia_km",5000
+20,0,4980,0,1.0,1.0,1.0,1.0,0.9999926633259719,2,4,"velocidad_tx_10m,velocidad_desplazamiento_kmh,ratio_desviacion_monto,distancia_residencia_km",5000
+14,0,4980,6,0.7,1.0,0.8235294117647058,0.8621621621621621,0.9997776534790904,2,1,velocidad_desplazamiento_kmh,5000

@@ -1,0 +1,49 @@
+{
+  "model": "LightGBM ONNX",
+  "original_feature_count": 9,
+  "original_features": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ],
+  "transformed_feature_count": 15,
+  "transformed_features": [
+    "numeric__monto_transaccion",
+    "numeric__velocidad_tx_10m",
+    "numeric__velocidad_desplazamiento_kmh",
+    "numeric__ratio_desviacion_monto",
+    "numeric__pais_emisor_coincide",
+    "numeric__distancia_residencia_km",
+    "numeric__hora_dia",
+    "categorical__canal_transaccion_ATM",
+    "categorical__canal_transaccion_App Móvil",
+    "categorical__canal_transaccion_E-Commerce",
+    "categorical__canal_transaccion_POS",
+    "categorical__categoria_comercio_Entretenimiento",
+    "categorical__categoria_comercio_Retail",
+    "categorical__categoria_comercio_Supermercados",
+    "categorical__categoria_comercio_Viajes"
+  ],
+  "onnx_input": {
+    "name": "features",
+    "shape": [
+      null,
+      15
+    ],
+    "type": "tensor(float)"
+  },
+  "checks": {
+    "9_original_features": true,
+    "15_transformed_features": true,
+    "onnx_dimension_matches_preprocessor": true,
+    "onnx_float32": true,
+    "all_checks_passed": true
+  },
+  "notes": "Manifest generated from frozen preprocessor and ONNX metadata; no retraining."
+}

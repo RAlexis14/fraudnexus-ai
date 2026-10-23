@@ -21,6 +21,10 @@ COPY reports/lightgbm_latency_benchmark.json ./reports/lightgbm_latency_benchmar
 
 COPY reports/fraud_patterns/ ./reports/fraud_patterns/
 
+COPY reports/feature_importance_development.csv ./reports/feature_importance_development.csv
+COPY reports/feature_reduction/summary.csv ./reports/feature_reduction/summary.csv
+COPY reports/onnx_input_contract.json ./reports/onnx_input_contract.json
+
 # Model comparison visualizations
 COPY reports/figures/model_selection/ ./reports/figures/model_selection/
 
