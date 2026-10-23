@@ -14,6 +14,13 @@ COPY dashboard/ ./dashboard/
 COPY reports/eda_summary.json ./reports/eda_summary.json
 COPY reports/model_comparison.json ./reports/model_comparison.json
 COPY reports/onnx_validation.json ./reports/onnx_validation.json
+# Academic evaluation and model comparison reports
+COPY reports/resampling_comparison.json ./reports/resampling_comparison.json
+COPY reports/lightgbm_final_holdout.json ./reports/lightgbm_final_holdout.json
+COPY reports/lightgbm_latency_benchmark.json ./reports/lightgbm_latency_benchmark.json
+
+# Model comparison visualizations
+COPY reports/figures/model_selection/ ./reports/figures/model_selection/
 
 EXPOSE 8501
 

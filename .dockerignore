@@ -12,7 +12,8 @@ __pycache__/
 data/
 tests/
 docs/
-reports/figures/
+reports/figures/*
+!reports/figures/model_selection/
 reports/evidence/
 *.log
 
