@@ -1,0 +1,9 @@
+{
+  "scope": "In-sample descriptive sensitivity on frozen full-development model; not holdout or causal importance",
+  "rows": 40000,
+  "positive_cases": 160,
+  "baseline_ap": 1.0,
+  "permutations_per_feature": 3,
+  "seed": 42,
+  "note": "Do not use to retune model/threshold based on final holdout"
+}

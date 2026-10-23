@@ -19,6 +19,8 @@ COPY reports/resampling_comparison.json ./reports/resampling_comparison.json
 COPY reports/lightgbm_final_holdout.json ./reports/lightgbm_final_holdout.json
 COPY reports/lightgbm_latency_benchmark.json ./reports/lightgbm_latency_benchmark.json
 
+COPY reports/fraud_patterns/ ./reports/fraud_patterns/
+
 # Model comparison visualizations
 COPY reports/figures/model_selection/ ./reports/figures/model_selection/
 

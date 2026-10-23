@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import json
+import io
+import time
+from datetime import datetime, timezone
 import os
 from pathlib import Path
 from typing import Any
@@ -44,6 +47,74 @@ def api_post(path: str, data: dict[str, Any], timeout: int = 20) -> dict[str, An
     if not response.ok:
         raise ValueError(f"API HTTP {response.status_code}: {response.text[:700]}")
     return response.json()
+
+
+COLUMNS = ["monto_transaccion", "canal_transaccion", "categoria_comercio", "velocidad_tx_10m",
+           "velocidad_desplazamiento_kmh", "ratio_desviacion_monto", "pais_emisor_coincide",
+           "distancia_residencia_km", "hora_dia"]
+NUMERIC = ["monto_transaccion", "velocidad_tx_10m", "velocidad_desplazamiento_kmh",
+           "ratio_desviacion_monto", "pais_emisor_coincide", "distancia_residencia_km", "hora_dia"]
+ALLOWED = {"canal_transaccion": ["POS", "E-Commerce", "ATM", "App Móvil"],
+           "categoria_comercio": ["Retail", "Viajes", "Supermercados", "Entretenimiento"]}
+
+
+def patterns_csv(name: str) -> pd.DataFrame:
+    p = REPORTS / "fraud_patterns" / name
+    if not p.is_file():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(p, encoding="utf-8-sig")
+    except (OSError, ValueError, pd.errors.ParserError) as exc:
+        st.warning(f"No se pudo leer {name}: {exc}")
+        return pd.DataFrame()
+
+
+def validate_transactions(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+    issues = []
+    missing = [c for c in COLUMNS if c not in frame.columns]
+    if missing:
+        return pd.DataFrame(), ["Faltan columnas: " + ", ".join(missing)]
+    df = frame.copy()
+    for name in NUMERIC:
+        df[name] = pd.to_numeric(df[name], errors="coerce")
+    for name, choices in ALLOWED.items():
+        invalid = ~df[name].isin(choices)
+        if invalid.any():
+            issues.append(f"{name}: {int(invalid.sum())} valores ajenos a {choices}")
+    for name in NUMERIC:
+        bad = df[name].isna() | ~df[name].apply(lambda x: bool(pd.notna(x) and abs(x) != float('inf')))
+        if bad.any(): issues.append(f"{name}: {int(bad.sum())} valores ausentes o no numéricos")
+    for name in ["monto_transaccion", "velocidad_tx_10m", "velocidad_desplazamiento_kmh", "ratio_desviacion_monto", "distancia_residencia_km"]:
+        if (df[name] < 0).any(): issues.append(f"{name}: contiene negativos")
+    if (~df['hora_dia'].between(0,23) | (df['hora_dia'] % 1 != 0)).any(): issues.append("hora_dia debe ser entero de 0 a 23")
+    if (~df['pais_emisor_coincide'].isin([0,1])).any(): issues.append("pais_emisor_coincide debe ser 0 o 1")
+    if (df['velocidad_tx_10m'] % 1 != 0).any(): issues.append("velocidad_tx_10m debe ser un entero")
+    if 'es_fraude' in df.columns:
+        df['es_fraude'] = pd.to_numeric(df['es_fraude'], errors='coerce')
+        if (~df['es_fraude'].isin([0,1])).any(): issues.append("es_fraude debe contener únicamente 0 o 1")
+    return df, issues
+
+
+def inference_metrics(df: pd.DataFrame) -> dict:
+    y = df['es_fraude'].astype(int)
+    p = df['is_fraud'].astype(int)
+    tp = int(((y==1)&(p==1)).sum()); tn=int(((y==0)&(p==0)).sum())
+    fp=int(((y==0)&(p==1)).sum()); fn=int(((y==1)&(p==0)).sum())
+    prec=tp/(tp+fp) if tp+fp else 0.; rec=tp/(tp+fn) if tp+fn else 0.
+    return {'tp':tp,'tn':tn,'fp':fp,'fn':fn,'precision':prec,'recall':rec,
+            'f1':2*prec*rec/(prec+rec) if prec+rec else 0.,'fpr':fp/(fp+tn) if fp+tn else 0.}
+
+
+def show_indicator(model: dict, final: dict):
+    active=model.get('model')
+    if model.get('status') != 'ok':
+        st.error("API sin conexión: no se ejecutarán nuevas inferencias")
+    elif active != 'lightgbm_candidate':
+        st.warning(f"Motor conectado: {active}. Las métricas finales que se muestran pertenecen a LightGBM, NO a este motor.")
+    elif final:
+        st.success("Motor conectado: LightGBM ONNX · evaluación final documentada")
+    else:
+        st.warning("LightGBM activo; no se encontró el informe de evaluación final")
 
 
 def apply_style() -> None:
@@ -89,7 +160,7 @@ def center_view(eda: dict, final: dict, latency: dict, health: dict):
     active = health.get("model", "No disponible") if health.get("status") == "ok" else "API desconectada"
     friendly = {"lightgbm_candidate":"LightGBM · seleccionado", "random_forest":"Random Forest · referencia"}.get(active,active)
     if health.get("status") == "ok":
-        st.success(f"Servicio operativo · Motor conectado: {friendly}")
+        show_indicator(health, final)
     else:
         st.error("No se puede consultar la API. Comprueba FastAPI o Docker.")
     metrics = final.get("metrics", {})
@@ -282,8 +353,225 @@ def technical_view(health:dict, final:dict):
     st.info("Prototipo académico: no conecta a redes de pago ni autoriza transacciones bancarias reales.")
 
 
+
+def pattern_view():
+    st.subheader("Inteligencia transaccional")
+    st.caption("Descripción del dataset académico completo: 50.000 operaciones, 200 fraudes. Asociaciones observadas, no causas ni estadísticas bancarias reales.")
+    canal=patterns_csv('canal_transaccion_summary.csv')
+    cats=patterns_csv('categoria_comercio_summary.csv')
+    countries=patterns_csv('pais_emisor_coincide_summary.csv')
+    hours=patterns_csv('hora_dia_summary.csv')
+    numeric=patterns_csv('numeric_by_class.csv')
+    if canal.empty or cats.empty:
+        st.error("Faltan los reportes del análisis descriptivo. Comprueba reports/fraud_patterns/ y la imagen Docker.")
+        return
+    k1,k2,k3,k4=st.columns(4)
+    k1.metric('Operaciones analizadas',f"{int(canal.operaciones.sum()):,}")
+    k2.metric('Casos etiquetados',f"{int(canal.fraudes.sum()):,}")
+    k3.metric('Tasa global', f"{100*canal.fraudes.sum()/canal.operaciones.sum():.2f}%")
+    k4.metric('Canal con mayor tasa',canal.sort_values('tasa_fraude_pct',ascending=False).iloc[0]['canal_transaccion'])
+    st.markdown('#### 01 · Canal y actividad comercial')
+    topic=st.radio('Dimensión de análisis',['Canal de transacción','Categoría comercial'],horizontal=True)
+    df,col=(canal,'canal_transaccion') if topic=='Canal de transacción' else (cats,'categoria_comercio')
+    mode=st.radio('Indicador',['Tasa de fraude (%)','Número de fraudes'],horizontal=True)
+    metric='tasa_fraude_pct' if mode.startswith('Tasa') else 'fraudes'
+    sorted_df=df.sort_values(metric,ascending=True)
+    c1,c2=st.columns([1.6,1])
+    with c1:
+        fig=px.bar(sorted_df,x=metric,y=col,orientation='h',text=metric,custom_data=['operaciones','fraudes'],
+                   color_discrete_sequence=[ACCENT])
+        fig.update_traces(texttemplate='%{text:.3f}' if metric=='tasa_fraude_pct' else '%{text:.0f}',
+                          textposition='outside',hovertemplate='%{y}<br>Valor: %{x:.3f}<br>Operaciones: %{customdata[0]:,}<br>Fraudes: %{customdata[1]:,}<extra></extra>')
+        fig.update_layout(height=340,margin=dict(l=10,r=45,t=15,b=40),
+                          xaxis_title='Tasa de fraude (%)' if metric=='tasa_fraude_pct' else 'Fraudes (casos)',
+                          yaxis_title='Canal' if col=='canal_transaccion' else 'Categoría comercial',showlegend=False)
+        st.plotly_chart(fig,use_container_width=True)
+    with c2:
+        st.dataframe(df[[col,'operaciones','fraudes','tasa_fraude_pct']].sort_values('tasa_fraude_pct',ascending=False)
+                    .rename(columns={col:'Grupo','operaciones':'Operaciones','fraudes':'Fraudes','tasa_fraude_pct':'Tasa (%)'})
+                    .style.format({'Tasa (%)':'{:.3f}'}),use_container_width=True,hide_index=True)
+        top_rate=df.loc[df.tasa_fraude_pct.idxmax()]
+        top_count=df.loc[df.fraudes.idxmax()]
+        st.info(f"Mayor tasa: **{top_rate[col]}** ({top_rate.tasa_fraude_pct:.3f}%; {int(top_rate.fraudes)} casos / {int(top_rate.operaciones)} operaciones). "
+                f"Mayor número de casos: **{top_count[col]}** ({int(top_count.fraudes)}).")
+    st.markdown('#### 02 · Contexto geográfico y temporal')
+    left,right=st.columns(2)
+    with left:
+        if not countries.empty:
+            country=countries.copy();country['Grupo']=country.pais_emisor_coincide.map({'0':'País no coincide','1':'País coincide',0:'País no coincide',1:'País coincide'}).fillna(country.pais_emisor_coincide.astype(str))
+            fig=px.bar(country,x='Grupo',y='tasa_fraude_pct',text='tasa_fraude_pct',color_discrete_sequence=[AMBER])
+            fig.update_traces(texttemplate='%{text:.2f}%',textposition='outside')
+            fig.update_layout(title='Coincidencia del país emisor',xaxis_title='Contexto de la operación',yaxis_title='Fraudes / operaciones (%)',height=360,showlegend=False)
+            st.plotly_chart(fig,use_container_width=True)
+            st.caption('Tasa dentro de cada grupo; no indica que una compra internacional sea fraudulenta.')
+    with right:
+        if not hours.empty:
+            hh=hours.sort_values('hora_dia')
+            fig=go.Figure()
+            fig.add_trace(go.Bar(x=hh.hora_dia,y=hh.fraudes,name='Fraudes (casos)',marker_color=ACCENT))
+            fig.add_trace(go.Scatter(x=hh.hora_dia,y=hh.tasa_fraude_pct,name='Tasa (%)',yaxis='y2',mode='lines+markers',line_color=AMBER))
+            fig.update_layout(title='Fraude por hora del día',xaxis_title='Hora (0–23)',yaxis_title='Fraudes (casos)',
+                yaxis2=dict(title='Tasa de fraude (%)',overlaying='y',side='right'),legend=dict(orientation='h',y=-.3),height=360)
+            st.plotly_chart(fig,use_container_width=True)
+            st.caption('La tasa horaria depende del volumen de operaciones; consulte el detalle por hora antes de interpretar picos.')
+    st.markdown('#### 03 · Diferencias de comportamiento entre clases')
+    if not numeric.empty:
+        labels={'monto_transaccion':'Monto (USD)','velocidad_tx_10m':'Transacciones en 10 minutos',
+                'velocidad_desplazamiento_kmh':'Desplazamiento (km/h)','ratio_desviacion_monto':'Desviación de monto (ratio)',
+                'distancia_residencia_km':'Distancia a residencia (km)'}
+        selection=st.selectbox('Variable para explorar',list(labels),format_func=lambda x:labels[x])
+        dd=numeric[numeric.variable==selection].copy()
+        dd['Clase']=dd.clase.map({0:'Legítima',1:'Fraude'})
+        fig=px.bar(dd,x='Clase',y='mediana',text='mediana',color='Clase',
+            color_discrete_map={'Legítima':ACCENT,'Fraude':AMBER})
+        fig.update_traces(texttemplate='%{text:.2f}',textposition='outside')
+        fig.update_layout(showlegend=False,yaxis_title=f'Mediana · {labels[selection]}',xaxis_title='Etiqueta real',height=350)
+        st.plotly_chart(fig,use_container_width=True)
+        st.caption('Medianas por clase; diferencias descriptivas. No miden importancia predictiva ni causalidad.')
+        st.dataframe(dd[['Clase','n','p25','mediana','p75','promedio']].rename(columns={'n':'Operaciones','p25':'P25','mediana':'Mediana','p75':'P75','promedio':'Promedio'})
+             .style.format({'P25':'{:.2f}','Mediana':'{:.2f}','P75':'{:.2f}','Promedio':'{:.2f}'}),hide_index=True,use_container_width=True)
+        q=patterns_csv(selection+'_quintiles.csv')
+        if not q.empty:
+            with st.expander('Tasa por intervalos observados'):
+                st.dataframe(q[['intervalo','operaciones','fraudes','tasa_fraude_pct']]
+                    .rename(columns={'intervalo':'Intervalo','operaciones':'Operaciones','fraudes':'Fraudes','tasa_fraude_pct':'Tasa (%)'})
+                    .style.format({'Tasa (%)':'{:.3f}'}),hide_index=True,use_container_width=True)
+                st.caption('Los límites de intervalos son descriptivos, NO umbrales operativos validados.')
+    with st.expander('Metodología, alcance y limitaciones'):
+        st.markdown('''- Tasa = fraudes etiquetados / operaciones del grupo × 100; el denominador cambia entre grupos.
+- Los archivos agregados proceden del conjunto académico completo (incluye el holdout ya evaluado) y solo sirven para **descripción**, jamás para ajustar el modelo congelado.
+- Un patrón asociado no demuestra causalidad ni desempeño en datos bancarios de producción.
+- Las clases muestran separabilidad elevada y pocos fraudes (200); es necesario discutir la posible naturaleza artificial de los patrones.''')
+
+
+def csv_view(health: dict):
+    st.subheader('Análisis de transacciones CSV')
+    st.caption('Evaluación de archivos nuevos por FastAPI y ONNX. Hasta 5.000 filas por archivo y lotes de 250; sin entrenamiento ni actualización del modelo.')
+    st.warning('Utiliza datos académicos o anonimizados. No cargues información bancaria personal ni números reales de tarjetas.')
+    if health.get('status') != 'ok':
+        st.error('API desconectada. Inicia FastAPI antes de evaluar.');return
+    up=st.file_uploader('Archivo CSV (UTF-8)',type=['csv'],key='csv_upload')
+    if up is None: return
+    if up.size>4*1024*1024:
+        st.error('Archivo demasiado grande: máximo 4 MB.');return
+    try: df=pd.read_csv(up,encoding='utf-8-sig')
+    except Exception as exc: st.error(f'No se pudo abrir el CSV: {exc}');return
+    if not 1 <= len(df) <= 5000:
+        st.error('El archivo debe contener entre 1 y 5.000 filas.');return
+    validated,issues=validate_transactions(df)
+    if issues:
+        st.error('Hay errores de esquema. Corrige el archivo antes de procesarlo.')
+        for issue in issues:st.write('• '+issue)
+        return
+    st.success(f'{len(validated):,} registros válidos · {len(COLUMNS)} variables requeridas.' + (' · Etiquetas disponibles' if 'es_fraude' in validated else ' · Sin etiquetas'))
+    st.dataframe(validated.head(10),use_container_width=True,hide_index=True)
+    fingerprint=f'{up.name}:{up.size}:{hash(up.getvalue())}:{health.get("model")}'
+    if st.button('Ejecutar evaluación del archivo',type='primary'):
+        results=[];total=0.;failed=None
+        bar=st.progress(0,text='Ejecutando inferencia por lotes')
+        for offset in range(0,len(validated),250):
+            block=validated.iloc[offset:offset+250]
+            payload={'transactions':block[COLUMNS].to_dict(orient='records')}
+            try:
+                t0=time.perf_counter();reply=api_post('/predict/batch',payload,timeout=60)
+                total+=(time.perf_counter()-t0)*1000
+                preds=reply.get('predictions',[])
+                if len(preds)!=len(block):raise ValueError('La API devolvió una cantidad distinta de resultados')
+                results.extend(preds)
+            except (requests.RequestException,ValueError,KeyError) as exc:
+                failed=f'Lote desde fila {offset+1}: {exc}';break
+            bar.progress(min(1.,(offset+len(block))/len(validated)))
+        bar.empty()
+        if failed:st.error(f'Procesamiento interrumpido. No se publican resultados incompletos. {failed}')
+        else:
+            pred=pd.DataFrame(results)
+            output=validated.reset_index(drop=True).copy()
+            for col in ['score','margin','margin_threshold','decision','is_fraud']:
+                if col in pred:output[col]=pred[col].values
+            st.session_state['csv_output']=(fingerprint,output,round(total,2),health.get('model'))
+    entry=st.session_state.get('csv_output')
+    if entry and entry[0]==fingerprint:
+        _,out,elapsed,model=entry
+        m1,m2,m3=st.columns(3)
+        m1.metric('Operaciones',len(out));m2.metric('REVIEW',int((out.decision=='REVIEW').sum()));m3.metric('HTTP total (ms)',f'{elapsed:,.1f}')
+        st.caption(f'Motor: {model}. Tiempo total de llamadas HTTP de esta ejecución, no latencia individual ni prueba de streaming.')
+        st.dataframe(out,use_container_width=True,hide_index=True)
+        if 'es_fraude' in out:
+            mm=inference_metrics(out)
+            a,b,c,d=st.columns(4)
+            a.metric('Recall',f"{mm['recall']:.2%}");b.metric('Precision',f"{mm['precision']:.2%}")
+            c.metric('F1',f"{mm['f1']:.2%}");d.metric('FPR',f"{mm['fpr']:.2%}")
+            st.plotly_chart(conf_matrix_chart(mm['tn'],mm['fp'],mm['fn'],mm['tp'],f'Matriz de confusión · CSV etiquetado (n={len(out):,})'),use_container_width=True)
+            st.caption('Evaluación exploratoria de este archivo, independiente del holdout académico. Métricas de clases ausentes se definen como 0; examine soporte por clase.')
+        else:st.info('Sin columna es_fraude: no se pueden calcular Recall, F1 ni Precision. Las predicciones no son verdad terreno.')
+        st.download_button('Descargar predicciones CSV',out.to_csv(index=False).encode('utf-8-sig'),file_name='fraudnexus_predicciones.csv',mime='text/csv')
+
+
+def switch_view(health: dict):
+    st.subheader('Switch transaccional · simulación secuencial')
+    st.caption('Eventos individuales enviados a POST /predict mediante HTTP; no existe conexión a un switch real ni procesamiento distribuido.')
+    if health.get('status') != 'ok':st.error('API no disponible');return
+    x,y=st.columns([1,2])
+    qty=x.slider('Operaciones por ejecución',2,100,20,2)
+    mix=y.slider('Porcentaje de escenarios sospechosos (sintéticos)',0,100,25,5)
+    if st.button('Iniciar simulación',type='primary'):
+        normals=demo_records()[0::2];suspicious=demo_records()[1::2]
+        import random
+        rng=random.Random(20261022+qty+mix)
+        ledger=[];bar=st.progress(0)
+        for i in range(qty):
+            kind='sospechosa' if rng.random()<mix/100 else 'habitual'
+            tx=(suspicious if kind=='sospechosa' else normals)[i%2].copy()
+            start=time.perf_counter();ts=datetime.now(timezone.utc).isoformat(timespec='milliseconds')
+            try:
+                resp=api_post('/predict',tx,timeout=15)
+                latency=(time.perf_counter()-start)*1000
+                ledger.append({'ID':f'TX-{i+1:05d}','UTC':ts,'Escenario':kind,'Canal':tx['canal_transaccion'],
+                    'Monto (USD)':tx['monto_transaccion'],'Decisión':resp.get('decision'),'Score':resp.get('score'),
+                    'Margen':resp.get('margin'),'HTTP (ms)':round(latency,3),'Interno (ms)':resp.get('total_processing_ms')})
+            except (requests.RequestException,ValueError) as exc:
+                ledger.append({'ID':f'TX-{i+1:05d}','UTC':ts,'Escenario':kind,'Canal':tx['canal_transaccion'],
+                    'Monto (USD)':tx['monto_transaccion'],'Decisión':'ERROR','HTTP (ms)':round((time.perf_counter()-start)*1000,3),'Detalle':str(exc)[:150]})
+            bar.progress((i+1)/qty)
+        bar.empty()
+        st.session_state['switch_ledger']=pd.DataFrame(ledger)
+    ledger=st.session_state.get('switch_ledger')
+    if ledger is not None and not ledger.empty:
+        a,b,c,d=st.columns(4)
+        a.metric('Eventos enviados',len(ledger));b.metric('ALLOW',int((ledger['Decisión']=='ALLOW').sum()))
+        c.metric('REVIEW',int((ledger['Decisión']=='REVIEW').sum()))
+        d.metric('Errores',int((ledger['Decisión']=='ERROR').sum()))
+        st.dataframe(ledger,use_container_width=True,hide_index=True)
+        good=ledger[ledger['Decisión']!='ERROR']
+        if len(good):
+            fig=px.line(good,x='ID',y='HTTP (ms)',markers=True,title='Latencia HTTP por evento simulado')
+            fig.add_hline(y=100,line_dash='dash',line_color='#B45B4E',annotation_text='Referencia 100 ms')
+            fig.update_layout(xaxis_title='Evento secuencial',yaxis_title='Tiempo HTTP (ms)',height=330)
+            st.plotly_chart(fig,use_container_width=True)
+            st.caption(f"p95 de la sesión: {good['HTTP (ms)'].quantile(.95):.2f} ms · {len(good)} eventos válidos. "
+                'Los escenarios no son operaciones observadas ni etiquetas verdaderas; no calcular Recall con estos ejemplos.')
+        st.download_button('Exportar bitácora CSV',ledger.to_csv(index=False).encode('utf-8-sig'),file_name='fraudnexus_switch_simulado.csv',mime='text/csv')
+
+
+def importance_view():
+    st.markdown('#### Interpretabilidad · importancia por permutación')
+    p=REPORTS/'feature_importance_development.csv'
+    if not p.exists():
+        st.info('Aún no se ha ejecutado el estudio opcional de importancia de variables. No se inventan rankings.')
+        return
+    imp=pd.read_csv(p)
+    if not {'variable','mean_auc_pr_drop','std_auc_pr_drop'}.issubset(imp.columns):
+        st.warning('El reporte de importancia no tiene el esquema requerido.');return
+    fig=px.bar(imp.sort_values('mean_auc_pr_drop'),x='mean_auc_pr_drop',y='variable',orientation='h',
+            error_x='std_auc_pr_drop',title='Caída de AUC-PR al permutar cada variable · datos de desarrollo',
+            color_discrete_sequence=[ACCENT])
+    fig.update_layout(xaxis_title='Caída media de AUC-PR (unidades de 0 a 1)',yaxis_title='Variable original',height=430)
+    st.plotly_chart(fig,use_container_width=True)
+    st.caption('Importancia global asociativa, NO causal; depende del conjunto y de la correlación entre características. Evaluación sobre desarrollo, no holdout.')
+    st.dataframe(imp,use_container_width=True,hide_index=True)
+
 def main():
-    st.set_page_config(page_title="FraudNexus AI | Monitor de riesgo",page_icon="🏦",layout="wide")
+    st.set_page_config(page_title="FraudNexus AI | Monitor de riesgo",page_icon="🛡️",layout="wide")
     apply_style()
     st.markdown('<div class="hero"><strong>FraudNexus AI</strong><small>Plataforma académica de evaluación de riesgo transaccional · ONNX Runtime</small></div>',unsafe_allow_html=True)
     eda=read_json("eda_summary.json")
@@ -292,12 +580,18 @@ def main():
     final=read_json("lightgbm_final_holdout.json")
     latency=read_json("lightgbm_latency_benchmark.json")
     health=get_health()
-    tabs=st.tabs(["Centro de control","Evaluación individual","Simulación por lotes","Laboratorio de modelos","Arquitectura y auditoría"])
-    with tabs[0]:center_view(eda,final,latency,health)
-    with tabs[1]:individual_view()
-    with tabs[2]:simulation_view()
-    with tabs[3]:lab_view(initial,resampling,final)
-    with tabs[4]:technical_view(health,final)
+    nav=st.sidebar.radio('Navegación',['Centro de control','Inteligencia transaccional','Evaluación individual',
+        'Análisis de CSV','Switch simulado','Laboratorio de modelos','Arquitectura y auditoría'])
+    st.sidebar.caption('Modelo operativo: '+str(health.get('model','API desconectada')))
+    if nav=='Centro de control':center_view(eda,final,latency,health)
+    elif nav=='Inteligencia transaccional':pattern_view()
+    elif nav=='Evaluación individual':individual_view()
+    elif nav=='Análisis de CSV':csv_view(health)
+    elif nav=='Switch simulado':switch_view(health)
+    elif nav=='Laboratorio de modelos':
+        lab_view(initial,resampling,final)
+        importance_view()
+    else:technical_view(health,final)
     st.caption("FraudNexus AI · Prototipo de investigación. Los resultados académicos no garantizan desempeño bancario real.")
 
 
