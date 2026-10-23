@@ -1,0 +1,33 @@
+{
+  "model_name": "lightgbm",
+  "strategy": "weights",
+  "threshold": 0.9999999146869891,
+  "score_type": "classifier_score",
+  "feature_columns": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ],
+  "model_input_columns": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ],
+  "development_rows": 40000,
+  "cv_folds": 5,
+  "target_recall_for_oof_calibration": 0.925,
+  "calibration_protocol": "development_only_5fold_oof",
+  "warning": "Threshold calibrated from development OOF scores and frozen for full-development refit; validation estimates remain optimistic for threshold choice. Final holdout is untested."
+}
