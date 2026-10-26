@@ -1,0 +1,27 @@
+{
+  "model_name": "random_forest",
+  "threshold": 0.9666666666666667,
+  "score_type": "classifier_score",
+  "feature_columns": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ],
+  "model_input_columns": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ]
+}

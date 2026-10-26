@@ -1,0 +1,10 @@
+variable,mean_auc_pr_drop,std_auc_pr_drop,baseline_auc_pr
+ratio_desviacion_monto,0.9959598958333333,4.7123185567765184e-05,1.0
+monto_transaccion,0.0,0.0,1.0
+canal_transaccion,0.0,0.0,1.0
+categoria_comercio,0.0,0.0,1.0
+velocidad_tx_10m,0.0,0.0,1.0
+velocidad_desplazamiento_kmh,0.0,0.0,1.0
+pais_emisor_coincide,0.0,0.0,1.0
+distancia_residencia_km,0.0,0.0,1.0
+hora_dia,0.0,0.0,1.0

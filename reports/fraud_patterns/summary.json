@@ -1,0 +1,15 @@
+{
+  "dataset_rows": 50000,
+  "frauds": 200,
+  "legitimate": 49800,
+  "fraud_rate_pct": 0.4,
+  "scope": "Descriptive analysis on official academic dataset (not model performance)",
+  "warning": "Group associations are not causal. Small fraud counts imply uncertainty.",
+  "tables": {
+    "canal_transaccion": "canal_transaccion_summary.csv",
+    "categoria_comercio": "categoria_comercio_summary.csv",
+    "pais_emisor_coincide": "pais_emisor_coincide_summary.csv",
+    "hora_dia": "hora_dia_summary.csv"
+  },
+  "numeric_summary": "numeric_by_class.csv"
+}

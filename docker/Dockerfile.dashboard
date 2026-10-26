@@ -1,0 +1,33 @@
+
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements/dashboard.txt ./requirements/dashboard.txt
+
+RUN python -m pip install --no-cache-dir -r requirements/dashboard.txt
+
+COPY dashboard/ ./dashboard/
+COPY reports/eda_summary.json ./reports/eda_summary.json
+COPY reports/model_comparison.json ./reports/model_comparison.json
+COPY reports/onnx_validation.json ./reports/onnx_validation.json
+# Academic evaluation and model comparison reports
+COPY reports/resampling_comparison.json ./reports/resampling_comparison.json
+COPY reports/lightgbm_final_holdout.json ./reports/lightgbm_final_holdout.json
+COPY reports/lightgbm_latency_benchmark.json ./reports/lightgbm_latency_benchmark.json
+
+COPY reports/fraud_patterns/ ./reports/fraud_patterns/
+
+COPY reports/feature_importance_development.csv ./reports/feature_importance_development.csv
+COPY reports/feature_reduction/summary.csv ./reports/feature_reduction/summary.csv
+COPY reports/onnx_input_contract.json ./reports/onnx_input_contract.json
+
+# Model comparison visualizations
+COPY reports/figures/model_selection/ ./reports/figures/model_selection/
+
+EXPOSE 8501
+
+CMD ["python", "-m", "streamlit", "run", "dashboard/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]

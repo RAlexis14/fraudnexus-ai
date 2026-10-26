@@ -218,3 +218,48 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+
+# ============================================
+# FraudNexus AI - Project-specific rules
+# ============================================
+
+# Additional environment files
+.env.*
+!.env.example
+
+# Credentials and private keys
+*.pem
+*.key
+
+# Generated datasets
+/data/raw/*
+!/data/raw/.gitkeep
+
+/data/processed/*
+!/data/processed/.gitkeep
+
+/data/demo/*
+!/data/demo/.gitkeep
+
+# Generated models
+/models/*
+!/models/.gitkeep
+
+# Required inference artifacts
+!/models/fraud_detector.onnx
+!/models/fraud_preprocessor.joblib
+!/models/selected_model_metadata.json
+
+
+# Local editor configuration
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak

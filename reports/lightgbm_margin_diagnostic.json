@@ -1,0 +1,34 @@
+{
+  "scope": "DEVELOPMENT only, ONNX raw margin compatibility diagnostic",
+  "holdout_evaluated": false,
+  "source_transform": "LOGISTIC",
+  "diagnostic_transform": "NONE",
+  "margin_threshold": 16.276938777958534,
+  "sample_size": 960,
+  "python_positive_decisions": 160,
+  "checks": {
+    "col_0": {
+      "max_abs_margin_error": 33.24525046478393,
+      "median_abs_margin_error": 25.44315794100464,
+      "decision_disagreements_at_python_margin_threshold": 160,
+      "onnx_decision_positive_count": 0,
+      "first_positive_raw_value": -16.62262535095215
+    },
+    "col_1": {
+      "max_abs_margin_error": 7.449597170250399e-07,
+      "median_abs_margin_error": 7.449597152486831e-07,
+      "decision_disagreements_at_python_margin_threshold": 0,
+      "onnx_decision_positive_count": 160,
+      "first_positive_raw_value": 16.62262535095215
+    },
+    "col_1_minus_col_0": {
+      "max_abs_margin_error": 16.622625588072864,
+      "median_abs_margin_error": 12.721577853062746,
+      "decision_disagreements_at_python_margin_threshold": 0,
+      "onnx_decision_positive_count": 160,
+      "first_positive_raw_value": 33.2452507019043
+    }
+  },
+  "model_promoted": false,
+  "note": "Raw outputs may require adjustment for converter conventions; validate before deployment."
+}

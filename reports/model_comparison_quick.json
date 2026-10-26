@@ -1,0 +1,93 @@
+{
+  "dataset": "data\\raw\\transacciones_fraude_bancario.csv",
+  "n_total": 50000,
+  "n_development": 10000,
+  "n_external_holdout_reserved": 10000,
+  "cv_folds": 2,
+  "quick_experiment": true,
+  "threshold_target_recall": 0.9,
+  "selected_model": "random_forest",
+  "selection_method": "minimum_oof_fpr_at_recall_90_pct; tie_break_auc_pr",
+  "warning": "OOF threshold-selected metrics are development metrics and can be optimistic. Never present them as external test performance.",
+  "feature_columns": [
+    "monto_transaccion",
+    "canal_transaccion",
+    "categoria_comercio",
+    "velocidad_tx_10m",
+    "velocidad_desplazamiento_kmh",
+    "ratio_desviacion_monto",
+    "pais_emisor_coincide",
+    "distancia_residencia_km",
+    "hora_dia"
+  ],
+  "models": {
+    "random_forest": {
+      "threshold": 0.8745965262321145,
+      "score_type": "classifier_score",
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1": 0.9743589743589743,
+      "average_precision_auc_pr": 1.0,
+      "roc_auc": 1.0,
+      "false_positive_rate": 0.0,
+      "false_positive_count": 0,
+      "confusion_matrix": {
+        "tn": 9960,
+        "fp": 0,
+        "fn": 2,
+        "tp": 38
+      }
+    },
+    "xgboost": {
+      "threshold": 0.9552967548370361,
+      "score_type": "classifier_score",
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1": 0.9743589743589743,
+      "average_precision_auc_pr": 1.0,
+      "roc_auc": 1.0,
+      "false_positive_rate": 0.0,
+      "false_positive_count": 0,
+      "confusion_matrix": {
+        "tn": 9960,
+        "fp": 0,
+        "fn": 2,
+        "tp": 38
+      }
+    },
+    "lightgbm": {
+      "threshold": 0.9999894639717951,
+      "score_type": "classifier_score",
+      "precision": 1.0,
+      "recall": 0.925,
+      "f1": 0.961038961038961,
+      "average_precision_auc_pr": 1.0,
+      "roc_auc": 1.0,
+      "false_positive_rate": 0.0,
+      "false_positive_count": 0,
+      "confusion_matrix": {
+        "tn": 9960,
+        "fp": 0,
+        "fn": 3,
+        "tp": 37
+      }
+    },
+    "isolation_forest": {
+      "threshold": 0.2081785550497316,
+      "score_type": "anomaly_score_not_probability",
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.9473684210526315,
+      "average_precision_auc_pr": 1.0,
+      "roc_auc": 1.0,
+      "false_positive_rate": 0.0,
+      "false_positive_count": 0,
+      "confusion_matrix": {
+        "tn": 9960,
+        "fp": 0,
+        "fn": 4,
+        "tp": 36
+      }
+    }
+  }
+}

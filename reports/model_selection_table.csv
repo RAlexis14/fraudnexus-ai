@@ -1,0 +1,10 @@
+﻿configuration,model,strategy,recall,precision,f1,auc_pr,fpr,tp,fp,fn,tn
+lightgbm__weights,LightGBM,Pesos,0.98125,1.0,0.9905362776025236,1.0,0.0,157,0,3,39840
+lightgbm__adasyn,LightGBM,ADASYN,0.98125,1.0,0.9905362776025236,1.0,0.0,157,0,3,39840
+lightgbm__smote,LightGBM,SMOTE,0.975,1.0,0.9873417721518987,1.0,0.0,156,0,4,39840
+xgboost__weights,XGBoost,Pesos,0.9375,1.0,0.967741935483871,1.0,0.0,150,0,10,39840
+random_forest__weights,Random Forest,Pesos,0.93125,1.0,0.964401294498382,1.0,0.0,149,0,11,39840
+random_forest__smote,Random Forest,SMOTE,0.925,1.0,0.961038961038961,1.0,0.0,148,0,12,39840
+xgboost__smote,XGBoost,SMOTE,0.91875,1.0,0.9576547231270358,1.0,0.0,147,0,13,39840
+random_forest__adasyn,Random Forest,ADASYN,0.89375,1.0,0.9438943894389439,1.0,0.0,143,0,17,39840
+xgboost__adasyn,XGBoost,ADASYN,0.8875,1.0,0.9403973509933775,1.0,0.0,142,0,18,39840

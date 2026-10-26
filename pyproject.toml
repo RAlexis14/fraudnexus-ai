@@ -1,0 +1,26 @@
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fraudnexus-ai"
+version = "0.1.0"
+description = "Real-time banking fraud detection using machine learning"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy==1.26.4",
+    "pandas==2.2.3"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==8.3.4"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

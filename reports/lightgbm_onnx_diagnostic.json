@@ -1,0 +1,177 @@
+{
+  "created_utc": "2026-10-22T19:00:32.808503+00:00",
+  "validation_scope": "candidate export equivalence on DEVELOPMENT data only; in-sample for final fitted model",
+  "holdout_evaluated": false,
+  "model": "lightgbm__weights",
+  "original_threshold_float64": 0.9999999146869891,
+  "rounded_threshold_float32": 0.9999999403953552,
+  "evaluated_rows": 960,
+  "positives": 160,
+  "negatives": 800,
+  "onnx_inputs": [
+    {
+      "name": "features",
+      "type": "tensor(float)"
+    }
+  ],
+  "onnx_outputs": [
+    {
+      "name": "label",
+      "type": "tensor(int64)"
+    },
+    {
+      "name": "probabilities",
+      "type": "seq(map(int64,tensor(float)))"
+    }
+  ],
+  "max_probability_difference": 5.883033182829678e-08,
+  "mean_probability_difference": 1.4595423233517627e-08,
+  "decision_disagreements": 160,
+  "decision_agreement": 0.8333333333333334,
+  "decision_disagreement_examples": [
+    {
+      "sample_index": 0,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 1,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 2,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 3,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 4,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 5,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 6,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 7,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 8,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    },
+    {
+      "sample_index": 9,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104
+    }
+  ],
+  "nearest_to_threshold": [
+    {
+      "sample_index": 0,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 102,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 103,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 104,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 105,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 106,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 107,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 108,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 101,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    },
+    {
+      "sample_index": 109,
+      "actual": 1,
+      "python_score": 0.9999999396210423,
+      "onnx_score": 0.9999998807907104,
+      "python_review": true,
+      "onnx_review": false
+    }
+  ],
+  "safe_to_promote_based_on_checked_samples": false,
+  "warning": "Zero disagreements on this sample is necessary but not sufficient for deployment; ONNX numerical behavior near threshold requires further validation."
+}

@@ -1,0 +1,10 @@
+# Python 3.12; preserve versions compatible with existing ML artifacts.
+fastapi==0.115.6
+uvicorn==0.34.0
+pydantic==2.10.4
+httpx==0.28.1
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+onnxruntime==1.20.1
+joblib==1.4.2

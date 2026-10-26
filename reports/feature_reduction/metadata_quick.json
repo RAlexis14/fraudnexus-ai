@@ -1,0 +1,340 @@
+{
+  "scope": "Development-only outer stratified folds; feature ranking on fit partition only",
+  "quick": true,
+  "dataset_file": "transacciones_fraude_bancario.csv",
+  "development_rows": 10000,
+  "development_frauds": 40,
+  "holdout_used_for_scoring": false,
+  "holdout_used_for_feature_selection": false,
+  "frozen_deployed_model_changed": false,
+  "selection_method": "mutual_info_classif",
+  "calibration_method": "internal 25% split, threshold for >=91% recall on calibration",
+  "feature_counts": [
+    9,
+    6,
+    4,
+    1
+  ],
+  "created_utc": "2026-10-23T04:45:14.321145+00:00",
+  "selection_by_fold": [
+    {
+      "fold": 1,
+      "variable_count": 9,
+      "features": [
+        "monto_transaccion",
+        "canal_transaccion",
+        "categoria_comercio",
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "pais_emisor_coincide",
+        "distancia_residencia_km",
+        "hora_dia"
+      ],
+      "ranking_fit_only": null
+    },
+    {
+      "fold": 1,
+      "variable_count": 6,
+      "features": [
+        "monto_transaccion",
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "pais_emisor_coincide",
+        "distancia_residencia_km"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022317506959314337
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.018911561080472317
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009115398845603861
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.008278005494749552
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.004459150775271925
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0025309827201564156
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0010354186367855693
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "variable_count": 4,
+      "features": [
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "distancia_residencia_km"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022317506959314337
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.018911561080472317
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009115398845603861
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.008278005494749552
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.004459150775271925
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0025309827201564156
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0010354186367855693
+        }
+      ]
+    },
+    {
+      "fold": 1,
+      "variable_count": 1,
+      "features": [
+        "ratio_desviacion_monto"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022317506959314337
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.018911561080472317
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009115398845603861
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.008278005494749552
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.004459150775271925
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0025309827201564156
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0010354186367855693
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "variable_count": 9,
+      "features": [
+        "monto_transaccion",
+        "canal_transaccion",
+        "categoria_comercio",
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "pais_emisor_coincide",
+        "distancia_residencia_km",
+        "hora_dia"
+      ],
+      "ranking_fit_only": null
+    },
+    {
+      "fold": 2,
+      "variable_count": 6,
+      "features": [
+        "monto_transaccion",
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "pais_emisor_coincide",
+        "distancia_residencia_km"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.025653249923053623
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.02414841436072579
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022139729181536505
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.010307179482896056
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009812853907224306
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0019217233649911067
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.0018448182490793386
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0008316398846145547
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "variable_count": 4,
+      "features": [
+        "velocidad_tx_10m",
+        "velocidad_desplazamiento_kmh",
+        "ratio_desviacion_monto",
+        "distancia_residencia_km"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.025653249923053623
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.02414841436072579
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022139729181536505
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.010307179482896056
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009812853907224306
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0019217233649911067
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.0018448182490793386
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0008316398846145547
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "variable_count": 1,
+      "features": [
+        "velocidad_desplazamiento_kmh"
+      ],
+      "ranking_fit_only": [
+        {
+          "variable": "velocidad_desplazamiento_kmh",
+          "mutual_information": 0.026212647164958636
+        },
+        {
+          "variable": "ratio_desviacion_monto",
+          "mutual_information": 0.025653249923053623
+        },
+        {
+          "variable": "velocidad_tx_10m",
+          "mutual_information": 0.02414841436072579
+        },
+        {
+          "variable": "distancia_residencia_km",
+          "mutual_information": 0.022139729181536505
+        },
+        {
+          "variable": "monto_transaccion",
+          "mutual_information": 0.010307179482896056
+        },
+        {
+          "variable": "pais_emisor_coincide",
+          "mutual_information": 0.009812853907224306
+        },
+        {
+          "variable": "canal_transaccion",
+          "mutual_information": 0.0019217233649911067
+        },
+        {
+          "variable": "hora_dia",
+          "mutual_information": 0.0018448182490793386
+        },
+        {
+          "variable": "categoria_comercio",
+          "mutual_information": 0.0008316398846145547
+        }
+      ]
+    }
+  ],
+  "caution": "Exploratory ablation after observing perfect final holdout; NOT a new unbiased final model-selection claim."
+}
