@@ -24,10 +24,11 @@ Proyecto académico desarrollado para el componente práctico del examen complex
 5. [Uso del dashboard y API](#uso-del-dashboard-y-api)
 6. [Pruebas automatizadas y validación ONNX](#pruebas-automatizadas-y-validación-onnx)
 7. [Entorno Python para análisis y desarrollo](#entorno-python-para-análisis-y-desarrollo)
-8. [Estructura del repositorio](#estructura-del-repositorio)
-9. [Reproducibilidad y datos](#reproducibilidad-y-datos)
-10. [Solución de problemas](#solución-de-problemas)
-11. [Versionamiento y actualización](#versionamiento-y-actualización)
+8. [Ejecución local sin Docker](#ejecución-local-sin-docker)
+9. [Estructura del repositorio](#estructura-del-repositorio)
+10. [Reproducibilidad y datos](#reproducibilidad-y-datos)
+11. [Solución de problemas](#solución-de-problemas)
+12. [Versionamiento y actualización](#versionamiento-y-actualización)
 
 ## Descripción y objetivos
 
@@ -313,6 +314,105 @@ python -m scripts.verify_onnx_input_contract
 ```
 
 > Los scripts que reconstruyen el entrenamiento o recalculan análisis sobre el CSV académico requieren el archivo original proporcionado en el ejercicio. No es parte de la instalación mínima para inferencia.
+
+
+## Ejecución local sin Docker
+
+FraudNexus AI también puede ejecutarse directamente en Windows mediante
+Python 3.12 y un entorno virtual, sin utilizar contenedores.
+
+### 1. Preparar el entorno
+
+Desde PowerShell, en la carpeta raíz del proyecto:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements/api.txt
+python -m pip install -r requirements/dashboard.txt
+python -m pip install -r requirements/training.txt
+python -m pip install -e .
+```
+
+Antes de iniciar el sistema, verificar que existan:
+
+- `models/candidates/lightgbm_weights/metadata.json`
+- `models/candidates/lightgbm_weights/model_margin_final.onnx`
+- `models/candidates/lightgbm_weights/preprocessor.joblib`
+
+### 2. Terminal 1 — Iniciar la API
+
+Abrir la primera terminal de PowerShell en la raíz del proyecto:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+
+$env:FRAUDNEXUS_MODEL = "lightgbm_candidate"
+
+python -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+Comprobar el servicio en:
+
+- API: http://127.0.0.1:8000/health
+- Swagger UI: http://127.0.0.1:8000/docs
+
+La respuesta de `/health` debe indicar `status: ok`
+y `model: lightgbm_candidate`.
+
+### 3. Terminal 2 — Iniciar el dashboard
+
+Mantener abierta la terminal de la API.
+
+Abrir una segunda terminal de PowerShell, también en la raíz
+del proyecto, y ejecutar:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+
+$env:API_BASE_URL = "http://127.0.0.1:8000"
+
+python -m streamlit run dashboard/app.py --server.port 8501
+```
+
+Abrir el dashboard en:
+
+http://localhost:8501
+
+La interfaz se comunica con la API local mediante HTTP.
+
+### 4. Comprobar el funcionamiento
+
+Desde el dashboard se pueden ejecutar predicciones individuales,
+procesar archivos CSV y utilizar el switch transaccional simulado.
+
+Para ejecutar las pruebas automatizadas en otra terminal:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+
+python -m pytest -q
+python -m scripts.verify_onnx_input_contract
+```
+
+### 5. Detener el proyecto
+
+En cada terminal, presionar `Ctrl + C`.
+
+### Diferencia entre los dos métodos
+
+- **Docker Compose:** ejecuta API y dashboard mediante contenedores.
+- **Entorno virtual:** ejecuta los dos servicios directamente con Python.
+
+Ambos utilizan los mismos artefactos de inferencia y el mismo
+modelo LightGBM seleccionado.
+
+**Nota:** no ejecutar simultáneamente Docker y la versión local
+sobre los mismos puertos 8000 y 8501.
+
+
 
 ## Estructura del repositorio
 
